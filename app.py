@@ -9,7 +9,7 @@ def hello_world():
             "wops"
         ]
     }
-    return resp, 200, { 'Content-Type': 'application/json' }
+    return resp, 200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
 
 if __name__ == '__main__':
     app.run()
