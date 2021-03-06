@@ -3,7 +3,13 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-    return 'Hello world!'
+    resp = {
+        "data": [
+            "hej",
+            "wops"
+        ]
+    }
+    return resp, 200, { 'Content-Type': 'application/json' }
 
 if __name__ == '__main__':
     app.run()
