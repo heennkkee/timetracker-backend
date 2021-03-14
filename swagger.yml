@@ -13,19 +13,86 @@ basePath: "/api"
 paths:
   /users:
     get:
-      operationId: "users.list_all"
+      operationId: users.list_all
       tags:
-        - "Users"
-      summary: "Users structure"
-      description: "Get users"
+        - Users
+      summary: Get all users
+      description: Get all users
       responses:
         200:
-          description: "Lists all users"
+          description: Lists all users
           schema:
-            type: "array"
+            type: array
             items:
               properties:
                 id:
-                  type: "number"
+                  type: number
                 name:
-                  type: "string"
+                  type: string
+    post:
+      operationId: users.add
+      tags:
+        - Users
+      summary: Adds a user
+      description: Adds a user
+      parameters:
+        - name: user
+          in: body
+          schema:
+            properties:
+              email:
+                type: string
+              name:
+                type: string
+          required: True
+      responses:
+        200:
+          description: The new user was successfully created
+          
+  /users/{id}:
+    get:
+      operationId: users.get
+      tags:
+        - Users
+      summary: Get user
+      description: Get one user with specified ID
+      parameters:
+        - name: id
+          in: path
+          description: ID of user to get
+          type: string
+          required: True
+      responses:
+        200:
+          description: The user exists
+          schema:
+            properties:
+              id:
+                type: number
+              name:
+                type: string
+              email:
+                type: string
+    put:
+      operationId: users.update
+      tags:
+        - Users
+      summary: Update user
+      description: Update user with specified ID
+      parameters:
+        - name: id
+          in: path
+          description: ID of user to update
+          type: string
+          required: True
+        - name: user
+          in: body
+          schema:
+            properties:
+              name:
+                type: string
+              email:
+                type: string
+      responses:
+        200:
+          description: The user that was updated
