@@ -1,0 +1,31 @@
+swagger: "2.0"
+info:
+  description: Swagger declaration of API
+  version: "0.0.1"
+  title: Timetracker documentation
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+basePath: "/api"
+
+paths:
+  /users:
+    get:
+      operationId: "users.list_all"
+      tags:
+        - "Users"
+      summary: "Users structure"
+      description: "Get users"
+      responses:
+        200:
+          description: "Lists all users"
+          schema:
+            type: "array"
+            items:
+              properties:
+                id:
+                  type: "number"
+                name:
+                  type: "string"

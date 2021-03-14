@@ -4,7 +4,7 @@ import connexion
 
 #app = Flask(__name__)
 app = connexion.App(__name__, specification_dir='./')
-#app.add_api('swagger.yml')
+app.add_api('swagger.yml')
 
 CORS(app.app)
 
@@ -17,23 +17,6 @@ def hello_world():
         ]
     }
     return jsonify(resp)
-
-@app.route('/users', methods=['GET'])
-def load_users():
-    resp = {
-        "data": [
-            {
-                "id": 1,
-                "name": "Henrik Aronsson"
-            },
-            {
-                "id": 2,
-                "name": "Person Persson"
-            }
-        ]
-    }
-    return jsonify(resp)
-
 
 @app.route('/users/<id>')
 def load_user(id):

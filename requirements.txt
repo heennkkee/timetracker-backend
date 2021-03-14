@@ -1,4 +1,5 @@
 gunicorn
 connexion
+connexion[swagger-ui]
 flask_cors
 flask
