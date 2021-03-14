@@ -1,7 +1,12 @@
-from flask import Flask
-app = Flask(__name__)
+from flask import Flask, jsonify
+import connexion
 
-@app.route('/')
+#app = Flask(__name__)
+app = connexion.App(__name__, specification_dir='./')
+#app.add_api('swagger.yml')
+
+
+@app.route('/', methods=['GET'])
 def hello_world():
     resp = {
         "data": [
@@ -9,9 +14,9 @@ def hello_world():
             "wops"
         ]
     }
-    return resp, 200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    return jsonify(resp)
 
-@app.route('/users')
+@app.route('/users', methods=['GET'])
 def load_users():
     resp = {
         "data": [
@@ -25,7 +30,7 @@ def load_users():
             }
         ]
     }
-    return resp, 200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    return jsonify(resp)
 
 
 @app.route('/users/<id>')
@@ -44,9 +49,9 @@ def load_user(id):
     }
 
     if id in users:
-        return { "data": users[id] }, 200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        return jsonify(users[id])
 
     return { "data": None }, 404, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5000, debug=True)
