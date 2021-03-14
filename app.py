@@ -51,7 +51,7 @@ def load_user(id):
     }
 
     if id in users:
-        return jsonify(users[id])
+        return jsonify({ "data": users[id] })
 
     return { "data": None }, 404, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
 
