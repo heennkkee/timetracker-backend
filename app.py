@@ -1,10 +1,12 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 import connexion
 
 #app = Flask(__name__)
 app = connexion.App(__name__, specification_dir='./')
 #app.add_api('swagger.yml')
 
+CORS(app.app)
 
 @app.route('/', methods=['GET'])
 def hello_world():
