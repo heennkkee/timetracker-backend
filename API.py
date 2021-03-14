@@ -23,10 +23,10 @@ def _404(message):
     return fail({ "message": message }, 404)
 
 def success(data, code):
-    return response({ "data": data, "success": True }, code)
+    return response({ "data": data, "error": None, "success": True }, code)
 
 def fail(data, code):
-    return response({ "data": data, "success": False }, code)
+    return response({ "data": None, "error": data, "success": False }, code)
 
 
 def response(data, code):

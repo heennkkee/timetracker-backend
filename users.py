@@ -17,7 +17,7 @@ def list_all():
     resp = []
 
     for userid in USERS:
-        resp.append({ "id": USERS[userid]['id'], "name": USERS[userid]['name'] })
+        resp.append({ "id": USERS[userid]['id'], "name": USERS[userid]['name'], "email": USERS[userid]['email'] })
 
     return API.OK(resp)
 
