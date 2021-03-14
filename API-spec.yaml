@@ -43,7 +43,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UserInput'
       responses:
         '201':
           description: The new user was successfully created
@@ -122,7 +122,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UserInput'
       responses:
         '200':
           description: The user that was updated
@@ -188,6 +188,17 @@ components:
       properties:
         id: 
           type: number
+        name:
+          type: string
+          example: John Doe
+        email:
+          type: string
+          example: john.doe@email.com
+    UserInput:
+      required:
+        - name
+        - email
+      properties:
         name:
           type: string
           example: John Doe

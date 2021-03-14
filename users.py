@@ -27,26 +27,26 @@ def get(id):
 
     return API._404("No such user")
 
-def update(id, user):
+def update(id, body):
     if id in USERS:
-        if "email" in user:
-            USERS[id]["email"] = user["email"]
+        if "email" in body:
+            USERS[id]["email"] = body["email"]
 
-        if "name" in user:
-            USERS[id]["name"] = user["name"]
+        if "name" in body:
+            USERS[id]["name"] = body["name"]
 
         return API.OK(USERS[id])
     
     return API.NotFound("User not found")
 
-def add(user):
+def add(body):
     newId = int(max(USERS, key=int)) + 1
 
     try:
         USERS[str(newId)] = {
             "id": newId,
-            "name": user["name"],
-            "email": user["email"]
+            "name": body["name"],
+            "email": body["email"]
         }
     except KeyError as keyErr:
         return API.Error("Missing attribute: " + str(keyErr))
