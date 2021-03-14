@@ -1,4 +1,4 @@
-from flask import jsonify
+import API
 
 USERS = {
     "1": {
@@ -19,13 +19,13 @@ def list_all():
     for userid in USERS:
         resp.append({ "id": USERS[userid]['id'], "name": USERS[userid]['name'] })
 
-    return jsonify({ "data": resp })
+    return API.OK(resp)
 
 def get(id):
     if id in USERS:
-        return jsonify({ "data": USERS[id] })
+        return API.OK(USERS[id])
 
-    return { "data": None }, 404, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    return API._404("No such user")
 
 def update(id, user):
     if id in USERS:
@@ -35,9 +35,9 @@ def update(id, user):
         if "name" in user:
             USERS[id]["name"] = user["name"]
 
-        return jsonify(USERS[id])
+        return API.OK(USERS[id])
     
-    return { "data": None }, 404, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    return API.NotFound("User not found")
 
 def add(user):
     newId = int(max(USERS, key=int)) + 1
@@ -49,6 +49,13 @@ def add(user):
             "email": user["email"]
         }
     except KeyError as keyErr:
-        return "Missing attribute " + str(keyErr), 400
+        return API.Error("Missing attribute: " + str(keyErr))
 
-    return jsonify(USERS[str(newId)])
+    return API.Created(USERS[str(newId)])
+
+def remove(id):
+    if id not in USERS:
+        return API.NotFound("User not found")
+    
+    del USERS[id]
+    return API.OK(None)

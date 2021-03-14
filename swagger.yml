@@ -1,8 +1,8 @@
 swagger: "2.0"
 info:
-  description: Swagger declaration of API
-  version: "0.0.1"
-  title: Timetracker documentation
+  description: Documentation for timetracker backend
+  version: "1.0.0"
+  title: Timetracker docs
 consumes:
   - "application/json"
 produces:
@@ -22,19 +22,23 @@ paths:
         200:
           description: Lists all users
           schema:
-            type: array
-            items:
-              properties:
-                id:
-                  type: number
-                name:
-                  type: string
+            properties: 
+              success:
+                type: boolean
+              data:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: number
+                    name:
+                      type: string
     post:
       operationId: users.add
       tags:
         - Users
-      summary: Adds a user
-      description: Adds a user
+      summary: Add a user
+      description: Add a user
       parameters:
         - name: user
           in: body
@@ -46,15 +50,40 @@ paths:
                 type: string
           required: True
       responses:
-        200:
+        201:
           description: The new user was successfully created
-          
+          schema:
+            properties:
+              success:
+                type: boolean
+              data:
+                type: object
+                properties:
+                  id:
+                    type: number
+                  name:
+                    type: string
+                  email:
+                    type: string
+        400:
+          description: Failed to add new user due to input error
+          schema:
+            properties:
+              success:
+                type: boolean
+                default: False
+              data:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: "Missing attribute: name"
   /users/{id}:
     get:
       operationId: users.get
       tags:
         - Users
-      summary: Get user
+      summary: Get a user
       description: Get one user with specified ID
       parameters:
         - name: id
@@ -64,20 +93,37 @@ paths:
           required: True
       responses:
         200:
-          description: The user exists
+          description: User that was found
           schema:
             properties:
-              id:
-                type: number
-              name:
-                type: string
-              email:
-                type: string
+              success:
+                type: boolean
+              data:
+                type: object
+                properties:
+                  id:
+                    type: number
+                  name:
+                    type: string
+                  email:
+                    type: string
+        404:
+          description: User was not found
+          schema:
+            properties:
+              success:
+                type: boolean
+                default: False
+              data:
+                type: object
+                properties:
+                  message:
+                    type: string
     put:
       operationId: users.update
       tags:
         - Users
-      summary: Update user
+      summary: Update a user
       description: Update user with specified ID
       parameters:
         - name: id
@@ -96,3 +142,46 @@ paths:
       responses:
         200:
           description: The user that was updated
+          schema:
+            properties:
+              success:
+                type: boolean
+              data:
+                properties:
+                  id:
+                    type: number
+                  name:
+                    type: string
+                  email:
+                    type: string
+        404:
+          description: Failed to find user
+          schema:
+            properties:
+              success:
+                type: boolean
+                default: False
+              data:
+                properties:
+                  message:
+                    type: string
+
+    delete:
+      operationId: users.remove
+      tags:
+        - Users
+      summary: Remove a user
+      description: Remove a user with specified ID
+      parameters:
+        - name: id
+          in: path
+          description: ID of user
+          type: string
+          required: True
+      responses:
+        200:
+          description: User was removed
+          schema:
+            properties: 
+              success:
+                type: boolean
