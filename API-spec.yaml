@@ -59,29 +59,15 @@ paths:
                   error:
                     $ref: '#/components/schemas/Error'                 
         '400':
-          description: Failed to add new user due to input error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  error:
-                    $ref: '#/components/schemas/Error'
-  /users/{id}:
+          $ref: '#/components/responses/InputError'
+  /users/{userid}:
     get:
       operationId: users.get
       tags:
         - Users
       summary: Get a user
       parameters:
-        - name: id
-          in: path
-          description: ID of user to get
-          required: True
-          schema:
-            type: string
+        - $ref: '#/components/parameters/UserId'
       responses:
         '200':
           description: User that was found
@@ -96,27 +82,14 @@ paths:
                   error:
                     $ref: '#/components/schemas/Error'
         '404':
-          description: User was not found
-          content: 
-            application/json:
-              schema:
-                properties:
-                  success:
-                    type: boolean
-                  error:
-                    $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/NotFound'
     put:
       operationId: users.update
       tags:
         - Users
       summary: Update a user
       parameters:
-        - name: id
-          in: path
-          description: ID of user to update
-          required: True
-          schema:
-            type: string
+        - $ref: '#/components/parameters/UserId'
       requestBody:
         required: True
         content:
@@ -137,15 +110,7 @@ paths:
                   error:
                     $ref: '#/components/schemas/Error'
         '404':
-          description: Failed to find user
-          content:
-            application/json:
-              schema:
-                properties:
-                  success:
-                    type: boolean
-                  error:
-                    $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/NotFound'
     delete:
       operationId: users.remove
       tags:
@@ -153,12 +118,7 @@ paths:
       summary: Remove a user
       description: Remove a user with specified ID
       parameters:
-        - name: id
-          in: path
-          description: ID of user
-          required: True
-          schema:
-            type: string
+        - $ref: '#/components/parameters/UserId'
       responses:
         '200':
           description: User was removed
@@ -169,15 +129,145 @@ paths:
                   success:
                     type: boolean
         '404':
-          description: Failed to find user
+          $ref: '#/components/responses/NotFound'
+  /users/{userid}/clockings:
+    get:
+      operationId: clockings.list_users_all_clockings
+      tags:
+        - Clockings
+      summary: Get all clockings from a user, sorted in descending order
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - name: limit
+          in: query
+          description: Optional parameter to limit number of returns
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Clockings
           content:
             application/json:
               schema:
                 properties:
                   success:
                     type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Clocking'
                   error:
                     $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      operationId: clockings.add
+      tags:
+        - Clockings
+      summary: Adds a clocking
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: True
+        content:
+          application/json:
+            schema:
+              $ref: '#components/schemas/ClockingInput'
+      responses:
+        '201':
+          description: Clocking was created
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Clocking'
+                  error:
+                    $ref: '#/components/schemas/Error'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/InputError'
+
+  /auth/{userid}/login:
+    post:
+      operationId: auth.login
+      tags:
+        - Authentication
+      summary: Logs in
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: True
+        content:
+          application/json:
+            schema:
+              properties:
+                password:
+                  type: string
+                  format: password
+      security: []
+      responses:
+        '200':
+          description: Response with token
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      session:
+                        type: string
+                  error:
+                    $ref: '#/components/schemas/Error'
+
+  /auth/{userid}/logout:
+    post:
+      operationId: auth.logout
+      tags:
+        - Authentication
+      summary: Logs out
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: True
+        content:
+          application/json:
+            schema:
+              properties:
+                session:
+                  type: string
+      responses:
+        '200':
+          description: User is logged out
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: session=ABC123; Max-Age=-1
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                  error:
+                    $ref: '#/components/schemas/Error'
+
+security:
+  - cookieAuth: []
+
 components:
   schemas:
     User:
@@ -211,3 +301,57 @@ components:
       properties:
         message:
           type: string
+    Clocking:
+      required:
+        - id
+        - direction
+        - user_id
+        - datetime
+      properties:
+        id:
+          type: integer
+        direction:
+          type: string
+          enum: [in, out]
+        user_id:
+          type: integer
+        datetime:
+          type: string
+          format: date-time
+    ClockingInput:
+      required:
+        - direction
+      properties:
+        direction:
+          type: string
+          enum: [in, out]
+        datetime:
+          type: string
+          format: date-time
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InputError:
+      description: Request failed due to input error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    UserId:
+      name: userid
+      in: path
+      description: Userid
+      required: True
+      schema:
+        type: integer
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session
+      x-apikeyInfoFunc: auth.isValidSession

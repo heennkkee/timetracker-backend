@@ -1,49 +1,37 @@
 import API
-
-USERS = {
-    "1": {
-            "id": 1,
-            "name": "Henrik Aronsson",
-            "email": "henrik@mail.com"
-        },
-    "2": {
-            "id": 2,
-            "name": "Person Persson",
-            "email": "pers@mail.com"
-        }
-}
+import DB
 
 def list_all():
     resp = []
 
-    for userid in USERS:
-        resp.append({ "id": USERS[userid]['id'], "name": USERS[userid]['name'], "email": USERS[userid]['email'] })
+    for userid in DB.USERS:
+        resp.append({ "id": DB.USERS[userid]['id'], "name": DB.USERS[userid]['name'], "email": DB.USERS[userid]['email'] })
 
     return API.OK(resp)
 
-def get(id):
-    if id in USERS:
-        return API.OK(USERS[id])
+def get(userid):
+    if userid in DB.USERS:
+        return API.OK(DB.USERS[userid])
 
     return API._404("No such user")
 
-def update(id, body):
-    if id in USERS:
+def update(userid, body):
+    if userid in DB.USERS:
         if "email" in body:
-            USERS[id]["email"] = body["email"]
+            DB.USERS[userid]["email"] = body["email"]
 
         if "name" in body:
-            USERS[id]["name"] = body["name"]
+            DB.USERS[userid]["name"] = body["name"]
 
-        return API.OK(USERS[id])
+        return API.OK(DB.USERS[userid])
     
     return API.NotFound("User not found")
 
 def add(body):
-    newId = int(max(USERS, key=int)) + 1
+    newId = int(max(DB.USERS, key=int)) + 1
 
     try:
-        USERS[str(newId)] = {
+        DB.USERS[str(newId)] = {
             "id": newId,
             "name": body["name"],
             "email": body["email"]
@@ -51,11 +39,11 @@ def add(body):
     except KeyError as keyErr:
         return API.Error("Missing attribute: " + str(keyErr))
 
-    return API.Created(USERS[str(newId)])
+    return API.Created(DB.USERS[str(newId)])
 
-def remove(id):
-    if id not in USERS:
+def remove(userid):
+    if userid not in DB.USERS:
         return API.NotFound("User not found")
     
-    del USERS[id]
+    del DB.USERS[userid]
     return API.OK(None)
