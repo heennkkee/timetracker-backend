@@ -22,7 +22,7 @@ def login(userid, body):
         "expiry": int(time.time()) + 3600 # 1 hour
     })
 
-    return API.OK({ "session": session }, { 'Set-Cookie': 'session={0}; Path=/; Max-Age=3600; SameSite=None'.format(session) })
+    return API.OK({ "session": session }, { 'Set-Cookie': 'session={0}; Path=/; Max-Age=3600; SameSite=None; Secure'.format(session) })
 
 def isValidSession(apikey, required_scopes=None):
 
@@ -40,4 +40,4 @@ def logout(userid, body):
     session = body["session"]
     DB.AUTHENTICATIONS = [x for x in DB.AUTHENTICATIONS if not (x["session"] == session and x["userid"] == userid)]
 
-    return API.OK(None, { 'Set-Cookie': 'session=; Path=/; Max-Age=-1; SameSite=None'})
+    return API.OK(None, { 'Set-Cookie': 'session=; Path=/; Max-Age=-1; SameSite=None; Secure'})
