@@ -4,7 +4,7 @@ import DB
 
 def list_users_all_clockings(userid, limit=None):
     resp = []
-    if userid not in DB.USERS:
+    if not DB.get_user(userid):
         return API.NotFound("No such user")
 
     for clocking in DB.CLOCKINGS:

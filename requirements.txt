@@ -2,3 +2,4 @@ gunicorn
 connexion[swagger-ui]
 flask_cors
 flask
+psycopg2-binary

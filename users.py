@@ -2,48 +2,53 @@ import API
 import DB
 
 def list_all():
-    resp = []
-
-    for userid in DB.USERS:
-        resp.append({ "id": DB.USERS[userid]['id'], "name": DB.USERS[userid]['name'], "email": DB.USERS[userid]['email'] })
-
-    return API.OK(resp)
+    return API.OK(DB.get_users())
 
 def get(userid):
-    if userid in DB.USERS:
-        return API.OK(DB.USERS[userid])
+    user = DB.get_user(userid)
+    if not user:
+        return API.NotFound("No such user")
 
-    return API.NotFound("No such user")
+    return API.OK(user)
+
 
 def update(userid, body):
-    if userid in DB.USERS:
-        if "email" in body:
-            DB.USERS[userid]["email"] = body["email"]
+    user = DB.get_user(userid)
 
-        if "name" in body:
-            DB.USERS[userid]["name"] = body["name"]
+    if not user:
+        return API.NotFound("No such user")
 
-        return API.OK(DB.USERS[userid])
+
+    if "email" in body:
+        user["email"] = body["email"]
+
+    if "name" in body:
+        user["name"] = body["name"]
     
-    return API.NotFound("User not found")
+    DB.update_user(user)
+
+    return API.OK(user)
 
 def add(body):
-    newId = int(max(DB.USERS, key=int)) + 1
 
     try:
-        DB.USERS[str(newId)] = {
-            "id": newId,
+        newUser = {
             "name": body["name"],
             "email": body["email"]
         }
     except KeyError as keyErr:
         return API.Error("Missing attribute: " + str(keyErr))
 
-    return API.Created(DB.USERS[str(newId)])
+    newUser = DB.add_user(newUser)
+
+    return API.Created(newUser)
 
 def remove(userid):
-    if userid not in DB.USERS:
-        return API.NotFound("User not found")
+    user = DB.get_user(userid)
+    if not user:
+        return API.NotFound("No such user")
     
-    del DB.USERS[userid]
+    if not DB.remove_user(userid):
+        return API.ServerError("Failed to remove user")
+
     return API.OK(None)

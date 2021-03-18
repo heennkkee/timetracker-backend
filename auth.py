@@ -15,29 +15,21 @@ def login(userid, body):
         return API.Unauthorized("Authorization failed")
 
     session = secrets.token_urlsafe(16)
-
-    DB.AUTHENTICATIONS.append({
-        "userid": userid,
-        "session": session,
-        "expiry": int(time.time()) + 3600 # 1 hour
-    })
+    
+    DB.add_auth(userid, session, int(time.time()) + 3600)
 
     return API.OK({ "session": session }, { 'Set-Cookie': 'session={0}; Path=/; Max-Age=3600; SameSite=None; Secure'.format(session) })
 
 def isValidSession(apikey, required_scopes=None):
-
-    epoch = int(time.time())
-    auths = (x for x in DB.AUTHENTICATIONS if x["session"] == apikey and x["expiry"] > epoch)
-
-    try:
-        next(auths)
+    if DB.check_if_session_valid(apikey):
         return {'sub': 'whatever'}
-    except StopIteration:
-        return None
+
+    return None
 
 def logout(userid, body):
     # Workaround...?
     session = body["session"]
-    DB.AUTHENTICATIONS = [x for x in DB.AUTHENTICATIONS if not (x["session"] == session and x["userid"] == userid)]
+
+    DB.remove_auth(session)
 
     return API.OK(None, { 'Set-Cookie': 'session=; Path=/; Max-Age=-1; SameSite=None; Secure'})

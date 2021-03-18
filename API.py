@@ -15,6 +15,10 @@ def NotFound(message, headers=None, title="Not found"):
 def Unauthorized(message, headers=None, title="Unauthorized"):
     return _401(message, headers, title)
 
+
+def ServerError(message, headers=None, title="Server error"):
+    return _500(message, headers, title)
+
 # Success
 
 def _200(data, headers):
@@ -33,6 +37,8 @@ def _401(message, headers, title):
 def _404(message, headers, title):
     return fail({ "detail": message, "title": title }, 404, headers)
 
+def _500(message, headers, title):
+    return fail({ "detail": message, "title": title }, 500, headers)
 
 # Base functionality 
 def success(data, code, headers):
