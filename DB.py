@@ -30,7 +30,7 @@ def close(conn, cur):
 def get_users():
     conn, cur = open()
 
-    cur.execute("SELECT id as id, name as name, email as email FROM public.user")
+    cur.execute("SELECT id as id, name as name, email as email FROM public.user ORDER BY id ASC")
     users = cur.fetchall()
 
     close(conn, cur)
