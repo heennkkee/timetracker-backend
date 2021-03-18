@@ -113,7 +113,7 @@ def check_if_session_valid(session):
 def remove_auth(session):
     conn, cur = open()
 
-    issue = cur.execute("DELETE FROM public.authenticate WHRE session = %s", ( session, ))
+    issue = cur.execute("DELETE FROM public.authenticate WHERE session = %s", ( session, ))
     if not issue:
         conn.commit()
 
