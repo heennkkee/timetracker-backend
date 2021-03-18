@@ -209,6 +209,24 @@ paths:
         '400':
           $ref: '#/components/responses/InputError'
 
+  /check:
+    get:
+      operationId: auth.check
+      tags:
+        - Authentication
+      summary: Dummy endpoint without data for authentication check
+      responses:
+        '200':
+          description: Authentication OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: integer
+                    enum: [200]
+        '401':
+          $ref: '#/components/responses/NotAuthorized'
   /auth/{userid}/login:
     post:
       operationId: auth.login
@@ -250,11 +268,7 @@ paths:
                       session:
                         type: string
         '401':
-          description: Failed to authorize
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultError'
+          $ref: '#/components/responses/NotAuthorized'          
 
   /auth/{userid}/logout:
     post:
@@ -386,6 +400,12 @@ components:
             $ref: '#/components/schemas/DefaultError'
     ServerError:
       description: Request failed on the server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DefaultError'
+    NotAuthorized:
+      description: Requester is not authorized
       content:
         application/json:
           schema:
