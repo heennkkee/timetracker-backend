@@ -44,7 +44,10 @@ def fail(data, code, headers):
 
 
 def response(data, code, headers):
-    respHeaders = { 'Content-Type': 'application/json' }
+    respHeaders = { 
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache'
+    }
 
     if headers:
         for key in headers:
