@@ -23,16 +23,18 @@ paths:
           content:
             application/json:
               schema:
+                required:
+                  - status
+                  - data
                 type: object
                 properties: 
-                  success:
-                    type: boolean
+                  status:
+                    type: integer
+                    enum: [200]
                   data:
                     type: array
                     items:
                       $ref: '#/components/schemas/User'
-                  error:
-                    $ref: '#/components/schemas/Error'
     post:
       operationId: users.add
       tags:
@@ -50,14 +52,16 @@ paths:
           content:
             application/json:
               schema:
+                required:
+                  - status
+                  - data
                 type: object
                 properties:
-                  success:
-                    type: boolean
+                  status:
+                    type: integer
+                    enum: [201]
                   data:
-                    $ref: '#/components/schemas/User'
-                  error:
-                    $ref: '#/components/schemas/Error'                 
+                    $ref: '#/components/schemas/User'            
         '400':
           $ref: '#/components/responses/InputError'
   /users/{userid}:
@@ -74,13 +78,15 @@ paths:
           content:
             application/json:
               schema:
+                required:
+                  - status
+                  - data
                 properties:
-                  success:
-                    type: boolean
+                  status:
+                    type: integer
+                    enum: [200]
                   data:
                     $ref: '#/components/schemas/User'
-                  error:
-                    $ref: '#/components/schemas/Error'
         '404':
           $ref: '#/components/responses/NotFound'
     put:
@@ -102,13 +108,15 @@ paths:
           content:
             application/json:
               schema:
+                required:
+                  - status
+                  - data
                 properties:
-                  success:
-                    type: boolean
+                  status:
+                    type: integer
+                    enum: [200]
                   data:
                     $ref: '#/components/schemas/User'
-                  error:
-                    $ref: '#/components/schemas/Error'
         '404':
           $ref: '#/components/responses/NotFound'
     delete:
@@ -125,9 +133,13 @@ paths:
           content:
             application/json:
               schema:
+                required:
+                  - status
+                  - data
                 properties: 
-                  success:
-                    type: boolean
+                  status:
+                    type: integer
+                    enum: [200]
         '404':
           $ref: '#/components/responses/NotFound'
   /users/{userid}/clockings:
@@ -149,15 +161,17 @@ paths:
           content:
             application/json:
               schema:
+                required:
+                  - status
+                  - data
                 properties:
-                  success:
-                    type: boolean
+                  status:
+                    type: integer
+                    enum: [200]
                   data:
                     type: array
                     items:
                       $ref: '#/components/schemas/Clocking'
-                  error:
-                    $ref: '#/components/schemas/Error'
         '404':
           $ref: '#/components/responses/NotFound'
     post:
@@ -172,20 +186,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#components/schemas/ClockingInput'
+              $ref: '#/components/schemas/ClockingInput'
       responses:
         '201':
           description: Clocking was created
           content:
             application/json:
               schema:
+                required:
+                  - status
+                  - data
                 properties:
-                  success:
-                    type: boolean
+                  status:
+                    type: integer
+                    enum: [201]
                   data:
                     $ref: '#/components/schemas/Clocking'
-                  error:
-                    $ref: '#/components/schemas/Error'
         '404':
           $ref: '#/components/responses/NotFound'
         '400':
@@ -219,16 +235,24 @@ paths:
           content:
             application/json:
               schema:
+                required:
+                  - status
+                  - data
                 properties:
-                  success:
-                    type: boolean
+                  status:
+                    type: integer
+                    enum: [200]
                   data:
                     type: object
                     properties:
                       session:
                         type: string
-                  error:
-                    $ref: '#/components/schemas/Error'
+        '401':
+          description: Failed to authorize
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultError'
 
   /auth/{userid}/logout:
     post:
@@ -257,13 +281,15 @@ paths:
           content:
             application/json:
               schema:
+                required:
+                  - status
+                  - data
                 properties:
-                  success:
-                    type: boolean
+                  status:
+                    type: integer
+                    enum: [200]
                   data:
                     type: object
-                  error:
-                    $ref: '#/components/schemas/Error'
 
 security:
   - cookieAuth: []
@@ -301,6 +327,21 @@ components:
       properties:
         message:
           type: string
+    DefaultError:
+      required:
+        - detail
+        - status
+        - title
+      properties:
+        detail:
+          type: string
+        status:
+          type: integer
+          enum: [400, 401, 403, 404]
+        title:
+          type: string
+        type:
+          type: string
     Clocking:
       required:
         - id
@@ -334,13 +375,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/DefaultError'
     InputError:
       description: Request failed due to input error
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/DefaultError'
   parameters:
     UserId:
       name: userid

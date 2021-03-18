@@ -12,7 +12,7 @@ def login(userid, body):
     
     # Validate password...
     if password != password:
-        return API.Unauthenticated("Failed to authenticate")
+        return API.Unauthorized("Authorization failed")
 
     session = secrets.token_urlsafe(16)
 
@@ -33,7 +33,7 @@ def isValidSession(apikey, required_scopes=None):
         next(auths)
         return {'sub': 'whatever'}
     except StopIteration:
-        return False
+        return None
 
 def logout(userid, body):
     # Workaround...?

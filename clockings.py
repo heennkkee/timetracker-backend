@@ -5,7 +5,7 @@ import DB
 def list_users_all_clockings(userid, limit=None):
     resp = []
     if userid not in DB.USERS:
-        return API._404("No such user")
+        return API.NotFound("No such user")
 
     for clocking in DB.CLOCKINGS:
         if clocking['user_id'] == userid:

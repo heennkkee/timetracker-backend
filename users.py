@@ -13,7 +13,7 @@ def get(userid):
     if userid in DB.USERS:
         return API.OK(DB.USERS[userid])
 
-    return API._404("No such user")
+    return API.NotFound("No such user")
 
 def update(userid, body):
     if userid in DB.USERS:
