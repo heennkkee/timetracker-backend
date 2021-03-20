@@ -209,7 +209,7 @@ paths:
         '400':
           $ref: '#/components/responses/InputError'
 
-  /check:
+  /auth/check:
     get:
       operationId: auth.check
       tags:
@@ -227,14 +227,12 @@ paths:
                     enum: [200]
         '401':
           $ref: '#/components/responses/NotAuthorized'
-  /auth/{userid}/login:
+  /auth/login:
     post:
       operationId: auth.login
       tags:
         - Authentication
       summary: Logs in
-      parameters:
-        - $ref: '#/components/parameters/UserId'
       requestBody:
         required: True
         content:
@@ -244,6 +242,12 @@ paths:
                 password:
                   type: string
                   format: password
+                e-mail:
+                  type: string
+                  format: email
+              required:
+                - password
+                - e-mail
       security: []
       responses:
         '200':
@@ -270,14 +274,12 @@ paths:
         '401':
           $ref: '#/components/responses/NotAuthorized'          
 
-  /auth/{userid}/logout:
+  /auth/logout:
     post:
       operationId: auth.logout
       tags:
         - Authentication
       summary: Logs out
-      parameters:
-        - $ref: '#/components/parameters/UserId'
       requestBody:
         required: True
         content:
@@ -306,6 +308,8 @@ paths:
                     enum: [200]
                   data:
                     type: object
+        '401':
+          $ref: '#/components/responses/NotAuthorized' 
 
 security:
   - cookieAuth: []

@@ -18,6 +18,9 @@ def update(userid, body):
     if not user:
         return API.NotFound("No such user")
 
+    if "id" in body:
+        if userid != body["id"]:
+            return API.InputError("IDs are not matching")
 
     if "email" in body:
         user["email"] = body["email"]
@@ -25,9 +28,10 @@ def update(userid, body):
     if "name" in body:
         user["name"] = body["name"]
     
-    DB.update_user(user)
-
-    return API.OK(user)
+    if DB.update_user(user):
+        return API.OK(user)
+    
+    return API.ServerError("Failed to update user")
 
 def add(body):
 
@@ -37,7 +41,7 @@ def add(body):
             "email": body["email"]
         }
     except KeyError as keyErr:
-        return API.Error("Missing attribute: " + str(keyErr))
+        return API.InputError("Missing attribute: " + str(keyErr))
 
     newUser = DB.add_user(newUser)
 

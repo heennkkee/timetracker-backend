@@ -32,6 +32,6 @@ def add(userid, body):
             "datetime": body.get("datetime", datetime.datetime.now())
         })
     except KeyError as keyErr:
-        return API.Error("Missing attribute: " + str(keyErr))
+        return API.InputError("Missing attribute: " + str(keyErr))
 
     return API.Created(DB.CLOCKINGS[-1])

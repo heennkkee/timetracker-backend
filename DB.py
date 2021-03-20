@@ -36,6 +36,15 @@ def get_users():
     close(conn, cur)
     return users
 
+def get_user_by_email(email):
+    conn, cur = open()
+
+    cur.execute('SELECT id as id, name as name, email as email FROM public.user WHERE email = %s', ( email, ))
+    user = cur.fetchone()
+
+    close(conn, cur)
+    return user
+
 def get_user(id):
     conn, cur = open()
 
@@ -48,13 +57,20 @@ def get_user(id):
 def update_user(user):
     conn, cur = open()
 
-    issue = cur.execute("UPDATE public.user SET name=%s, email=%s WHERE id = %s",
-        (user["name"], user["email"], user["id"]) )
-    
-    if not issue:
+    succes = True
+    try:
+        cur.execute("UPDATE public.user SET name=%s, email=%s WHERE id = %s",
+            (user["name"], user["email"], user["id"]) )
         conn.commit()
+    except Exception:
+        succes = False
+    finally:
+        close(conn, cur)
+
     
     close(conn, cur)
+
+    return succes
 
 def add_user(user):
     conn, cur = open()

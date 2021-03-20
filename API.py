@@ -6,7 +6,7 @@ def OK(data, headers=None):
 def Created(data, headers=None):
     return _201(data, headers)
 
-def Error(message, headers=None, title="Input error"):
+def InputError(message, headers=None, title="Input error"):
     return _400(message, headers, title)
 
 def NotFound(message, headers=None, title="Not found"):
