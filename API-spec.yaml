@@ -45,7 +45,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserInput'
+              $ref: '#/components/schemas/NewUserInput'
       responses:
         '201':
           description: The new user was successfully created
@@ -208,7 +208,33 @@ paths:
           $ref: '#/components/responses/NotFound'
         '400':
           $ref: '#/components/responses/InputError'
-
+  /users/{userid}/password:
+    put:
+      operationId: users.update_password
+      tags:
+        - Users
+      summary: Update user password
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: True
+        content:
+          application/json:
+            schema:
+              properties:
+                password:
+                  type: string
+                  format: password
+                newPassword:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyOk'
+        '401':
+          $ref: '#/components/responses/NotAuthorized'          
+        '404':
+          $ref: '#/components/responses/NotFound'
   /auth/check:
     get:
       operationId: auth.check
@@ -217,14 +243,7 @@ paths:
       summary: Dummy endpoint without data for authentication check
       responses:
         '200':
-          description: Authentication OK
-          content:
-            application/json:
-              schema:
-                properties:
-                  status:
-                    type: integer
-                    enum: [200]
+          $ref: '#/components/responses/EmptyOk'
         '401':
           $ref: '#/components/responses/NotAuthorized'
   /auth/login:
@@ -330,17 +349,28 @@ components:
         email:
           type: string
           example: john.doe@email.com
-    UserInput:
+    NewUserInput:
       required:
         - name
         - email
+        - password
       properties:
         name:
           type: string
           example: John Doe
         email:
           type: string
+          format: email
           example: john.doe@email.com
+        password:
+          type: string
+          format: password
+    UserInput:
+      properties:
+        name:
+          type: string
+        email:
+          type: string
     Error:
       required:
         - message
@@ -414,6 +444,17 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/DefaultError'
+    EmptyOk:
+      description: Response with just a 200-status code
+      content:
+        application/json:
+          schema:
+            required:
+              - status
+            properties:
+              status:
+                type: integer
+                enum: [200]
   parameters:
     UserId:
       name: userid

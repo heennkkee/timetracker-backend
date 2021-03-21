@@ -36,23 +36,54 @@ def get_users():
     close(conn, cur)
     return users
 
-def get_user_by_email(email):
+def get_user_by_email(email, includeHash = False):
     conn, cur = open()
 
-    cur.execute('SELECT id as id, name as name, email as email FROM public.user WHERE email = %s', ( email, ))
+    sql = ''
+
+    if includeHash:
+        sql = 'SELECT id as id, name as name, email as email, salt as salt, pwdhash as pwdhash FROM public.user WHERE email = %s'
+    else:
+        sql = 'SELECT id as id, name as name, email as email FROM public.user WHERE email = %s'
+
+    cur.execute(sql, ( email, ))
     user = cur.fetchone()
 
     close(conn, cur)
     return user
 
-def get_user(id):
+def get_user(id, includeHash = False):
     conn, cur = open()
+    sql = ''
 
-    cur.execute('SELECT id as id, name as name, email as email FROM public.user WHERE id = %s', ( id, ))
+    if includeHash:
+        sql = 'SELECT id as id, name as name, email as email, salt as salt, pwdhash as pwdhash FROM public.user WHERE id = %s'
+    else:
+        sql = 'SELECT id as id, name as name, email as email FROM public.user WHERE id = %s'
+
+    cur.execute(sql, ( id, ))
     user = cur.fetchone()
 
     close(conn, cur)
     return user
+
+def update_user_password(userId, pwdHash, newSalt):
+    conn, cur = open()
+
+    succes = True
+    try:
+        cur.execute("UPDATE public.user SET pwdhash=%s, salt=%s WHERE id = %s",
+            (pwdHash, newSalt, userId) )
+        conn.commit()
+    except Exception:
+        succes = False
+    finally:
+        close(conn, cur)
+
+    close(conn, cur)
+
+    return succes
+
 
 def update_user(user):
     conn, cur = open()
@@ -75,7 +106,7 @@ def update_user(user):
 def add_user(user):
     conn, cur = open()
 
-    issue = cur.execute("INSERT INTO public.user (name, email) VALUES (%s, %s) RETURNING id", ( user["name"], user["email"] ))
+    issue = cur.execute("INSERT INTO public.user (name, email, salt, pwdhash) VALUES (%s, %s, %s, %s) RETURNING id", ( user["name"], user["email"], user["salt"], user["pwdhash"] ))
     if not issue:
         conn.commit()
 

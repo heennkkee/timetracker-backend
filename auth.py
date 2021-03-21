@@ -1,23 +1,25 @@
-import requests
-import time
-import API
-import DB
-import uuid
-import secrets
+import requests, time, secrets, uuid, hashlib, binascii, os
+import API, DB
 
-LAME_SECRET = "suchsecret"
+def getNewSalt():
+    return hashlib.sha256(os.urandom(60)).hexdigest()
+
+def checkPwdHash(pwd, salt, targetHash):
+    return binascii.hexlify(targetHash) == binascii.hexlify(calcPwdHash(pwd, salt))
+
+def calcPwdHash(pwd, salt):
+    return hashlib.pbkdf2_hmac('sha256', pwd.encode('utf-8'), salt.encode('utf-8'), 100000, dklen=128)
 
 def login(body):
     email = body["e-mail"]
     password = body["password"]
     
-    user = DB.get_user_by_email(email)
+    user = DB.get_user_by_email(email, True)
 
     if not user:
         return API.Unauthorized("Authorization failed")
 
-    # Validate password...
-    if password != password:
+    if not checkPwdHash(password, user["salt"], user["pwdhash"]):
         return API.Unauthorized("Authorization failed")
 
     session = secrets.token_urlsafe(16)
