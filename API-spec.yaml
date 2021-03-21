@@ -264,6 +264,8 @@ paths:
                 e-mail:
                   type: string
                   format: email
+                mfacode:
+                  type: number
               required:
                 - password
                 - e-mail
@@ -293,6 +295,21 @@ paths:
                         type: string
                       userid:
                         type: number
+        '403':
+          description: Response to request 2fa authentication if useraccount requires it
+          content:
+            application/json:
+              schema:
+                required:
+                  - request
+                  - status
+                properties:
+                  status:
+                    type: integer
+                    enum: [403]
+                  detail:
+                    type: string
+                    enum: ["2fa"]
         '401':
           $ref: '#/components/responses/NotAuthorized'          
 
@@ -390,7 +407,7 @@ components:
           type: string
         status:
           type: integer
-          enum: [400, 401, 403, 404]
+          enum: [400, 401, 404]
         title:
           type: string
         type:

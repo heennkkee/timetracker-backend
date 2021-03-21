@@ -12,6 +12,9 @@ def InputError(message, headers=None, title="Input error"):
 def NotFound(message, headers=None, title="Not found"):
     return _404(message, headers, title)
 
+def Forbidden(message, headers=None, title="Forbidden"):
+    return _403(message, headers, title)
+
 def Unauthorized(message, headers=None, title="Unauthorized"):
     return _401(message, headers, title)
 
@@ -33,6 +36,9 @@ def _400(message, headers, title):
 
 def _401(message, headers, title):
     return fail({ "detail": message, "title": title }, 401, headers)
+
+def _403(message, headers, title):
+    return fail({ "detail": message, "title": title }, 403, headers)
 
 def _404(message, headers, title):
     return fail({ "detail": message, "title": title }, 404, headers)

@@ -1,5 +1,8 @@
-import requests, time, secrets, uuid, hashlib, binascii, os
+import requests, time, secrets, uuid, hashlib, binascii, os, pyotp
 import API, DB
+
+# pyotp.random_base32()
+# pyotp.TOTP(secret).now()
 
 def getNewSalt():
     return hashlib.sha256(os.urandom(60)).hexdigest()
@@ -13,6 +16,7 @@ def calcPwdHash(pwd, salt):
 def login(body):
     email = body["e-mail"]
     password = body["password"]
+    mfacode = body.get("mfacode", None)
     
     user = DB.get_user_by_email(email, True)
 
@@ -21,6 +25,13 @@ def login(body):
 
     if not checkPwdHash(password, user["salt"], user["pwdhash"]):
         return API.Unauthorized("Authorization failed")
+
+    if user["mfasecret"]:
+        if not mfacode:
+            return API.Forbidden("2fa")
+        
+        if not pyotp.TOTP(user["mfasecret"]).verify(mfacode):
+            return API.Unauthorized("Authorization failed")
 
     session = secrets.token_urlsafe(16)
 

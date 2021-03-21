@@ -42,7 +42,7 @@ def get_user_by_email(email, includeHash = False):
     sql = ''
 
     if includeHash:
-        sql = 'SELECT id as id, name as name, email as email, salt as salt, pwdhash as pwdhash FROM public.user WHERE email = %s'
+        sql = 'SELECT id as id, name as name, email as email, salt as salt, pwdhash as pwdhash, mfasecret as mfasecret FROM public.user WHERE email = %s'
     else:
         sql = 'SELECT id as id, name as name, email as email FROM public.user WHERE email = %s'
 
@@ -57,7 +57,7 @@ def get_user(id, includeHash = False):
     sql = ''
 
     if includeHash:
-        sql = 'SELECT id as id, name as name, email as email, salt as salt, pwdhash as pwdhash FROM public.user WHERE id = %s'
+        sql = 'SELECT id as id, name as name, email as email, salt as salt, pwdhash as pwdhash, mfasecret as mfasecret FROM public.user WHERE id = %s'
     else:
         sql = 'SELECT id as id, name as name, email as email FROM public.user WHERE id = %s'
 
