@@ -166,34 +166,71 @@ def remove_auth(session):
 
     close(conn, cur)
 
-    
+def get_clockings(userid, limit=None):
+    conn, cur = open()
+    sqlLimit = ''
+    if limit:
+        sqlLimit = ' LIMIT %s '
 
-AUTHENTICATIONS = [
-    {
-        "session": secrets.token_urlsafe(16),
-        "userid": 1,
-        "expiry": int(time.time()) + 3600
-    }
-]
+    sql = 'SELECT id as id, userid as userid, datetime as datetime, direction as direction FROM public.clocking WHERE userid = %s ORDER BY datetime desc' + sqlLimit
+
+    if limit:
+        cur.execute(sql, ( userid, limit ))
+    else:
+        cur.execute(sql, ( userid, ))
+    
+    clockings = cur.fetchall()
+
+    close(conn, cur)
+    
+    return clockings
+
+def add_clocking(clocking):
+    conn, cur = open()
+
+    try:
+        cur.execute("INSERT INTO public.clocking (userid, direction, datetime) VALUES (%s, %s, %s) RETURNING id", ( clocking["userid"], clocking["direction"], clocking["datetime"] ))
+        conn.commit()
+        newId = cur.fetchone()
+        if not newId:
+            raise Exception("Failed to insert post")
+        
+        clocking["id"] = newId["id"]
+    except Exception:
+        test = False
+    finally:
+        close(conn, cur)
+    
+  
+    return clocking
+
 
 CLOCKINGS = [
     {
         "id": 1,
-        "user_id": 1,
-        "datetime": datetime.datetime.now() + datetime.timedelta(hours=-8),
+        "userid": 1,
+        "datetime": datetime.datetime.utcnow() + datetime.timedelta(hours=-8),
         "direction": "in"
     },
     {
         "id": 2,
-        "user_id": 1,
-        "datetime": datetime.datetime.now() + datetime.timedelta(hours=-5),
+        "userid": 1,
+        "datetime": datetime.datetime.utcnow() + datetime.timedelta(hours=-5),
         "direction": "out"
     },
     {
         "id": 3,
-        "user_id": 1,
-        "datetime": datetime.datetime.now() + datetime.timedelta(hours=-4.5),
+        "userid": 1,
+        "datetime": datetime.datetime.utcnow() + datetime.timedelta(hours=-4.5),
         "direction": "in"
+    },
+    {
+        "id": 4,
+        "userid": 1,
+        "datetime": datetime.datetime.utcnow() + datetime.timedelta(hours=-1.5),
+        "direction": "out"
     }
 ]
+
+CLOCKINGS = []
 

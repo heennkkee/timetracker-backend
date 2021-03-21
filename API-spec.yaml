@@ -281,6 +281,7 @@ paths:
                 required:
                   - status
                   - data
+                  - userid
                 properties:
                   status:
                     type: integer
@@ -290,6 +291,8 @@ paths:
                     properties:
                       session:
                         type: string
+                      userid:
+                        type: number
         '401':
           $ref: '#/components/responses/NotAuthorized'          
 
@@ -396,7 +399,7 @@ components:
       required:
         - id
         - direction
-        - user_id
+        - userid
         - datetime
       properties:
         id:
@@ -404,7 +407,7 @@ components:
         direction:
           type: string
           enum: [in, out]
-        user_id:
+        userid:
           type: integer
         datetime:
           type: string

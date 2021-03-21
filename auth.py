@@ -26,7 +26,7 @@ def login(body):
 
     DB.add_auth(user["id"], session, int(time.time()) + 3600)
 
-    return API.OK({ "session": session }, { 'Set-Cookie': 'session={0}; Path=/; Max-Age=3600; SameSite=None; Secure'.format(session) })
+    return API.OK({ "session": session, "userid": user["id"] }, { 'Set-Cookie': 'session={0}; Path=/; Max-Age=3600; SameSite=None; Secure'.format(session) })
 
 def isValidSession(apikey, required_scopes=None):
     if DB.check_if_session_valid(apikey):
