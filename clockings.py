@@ -3,8 +3,17 @@ import API
 import DB
 
 def list_users_all_clockings(userid, limit=None):
-
     return API.OK(DB.get_clockings(userid, limit))
+
+def remove_clocking(userid, clockingid):
+    clocking = DB.get_clocking(userid, clockingid)
+    if not clocking:
+        API.NotFound("No such clocking")
+
+    if not DB.remove_clocking(userid, clockingid):
+        return API.ServerError("Failed to remove clocking")
+    
+    return API.OK(None)
 
 def add(userid, body):
     clocking = None

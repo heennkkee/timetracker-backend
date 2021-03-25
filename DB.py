@@ -204,33 +204,27 @@ def add_clocking(clocking):
   
     return clocking
 
+def remove_clocking(userid, clockingid):
+    conn, cur = open()
 
-CLOCKINGS = [
-    {
-        "id": 1,
-        "userid": 1,
-        "datetime": datetime.datetime.utcnow() + datetime.timedelta(hours=-8),
-        "direction": "in"
-    },
-    {
-        "id": 2,
-        "userid": 1,
-        "datetime": datetime.datetime.utcnow() + datetime.timedelta(hours=-5),
-        "direction": "out"
-    },
-    {
-        "id": 3,
-        "userid": 1,
-        "datetime": datetime.datetime.utcnow() + datetime.timedelta(hours=-4.5),
-        "direction": "in"
-    },
-    {
-        "id": 4,
-        "userid": 1,
-        "datetime": datetime.datetime.utcnow() + datetime.timedelta(hours=-1.5),
-        "direction": "out"
-    }
-]
+    succes = True
+    try:
+        cur.execute("DELETE FROM public.clocking WHERE id = %s and userid = %s", ( clockingid, userid))
+        conn.commit()
+    except Exception:
+        succes = False
+    finally:
+        close(conn, cur)
 
-CLOCKINGS = []
+    return succes
+
+def get_clocking(userid, clockingid):
+    conn, cur = open()
+    sql = 'SELECT id as id, userid as userid, direction as direction, datetime as datetime FROM public.clocking WHERE id = %s and userid = %s'
+
+    cur.execute(sql, ( clockingid, userid ))
+    clocking = cur.fetchone()
+
+    close(conn, cur)
+    return clocking
 
