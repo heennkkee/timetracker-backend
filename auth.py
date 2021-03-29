@@ -35,7 +35,7 @@ def login(body):
 
     session = secrets.token_urlsafe(16)
 
-    DB.add_auth(user["id"], session, int(time.time()) + 3600 * 24) # 24 hours validity
+    DB.add_auth(user["id"], session, 24) # 24 hours validity
 
     return API.OK({ "session": session, "userid": user["id"] }, { 'Set-Cookie': 'session={0}; Path=/; Max-Age=3600; SameSite=None; Secure'.format(session) })
 
