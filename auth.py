@@ -35,9 +35,10 @@ def login(body):
 
     session = secrets.token_urlsafe(16)
 
-    DB.add_auth(user["id"], session, 24) # 24 hours validity
+    idValidity = 24 #hours
+    DB.add_auth(user["id"], session, idValidity)
 
-    return API.OK({ "session": session, "userid": user["id"] }, { 'Set-Cookie': 'session={0}; Path=/; Max-Age=3600; SameSite=None; Secure'.format(session) })
+    return API.OK({ "session": session, "userid": user["id"] }, { 'Set-Cookie': 'session={0}; Path=/; Max-Age={1}; SameSite=None; Secure'.format(session, idValidity * 3600) })
 
 def isValidSession(apikey, required_scopes=None):
     if DB.check_if_session_valid(apikey):
