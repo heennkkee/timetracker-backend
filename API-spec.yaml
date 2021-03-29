@@ -156,6 +156,12 @@ paths:
           description: Optional parameter to limit number of returns
           schema:
             type: integer
+        - name: since
+          in: query
+          description: Optional parameter to limit since what datetime clockings should be included
+          schema:
+            type: string    
+            format: date-time
       responses:
         '200':
           description: Clockings
