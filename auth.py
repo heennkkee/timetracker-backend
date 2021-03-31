@@ -51,8 +51,10 @@ def check():
 
 def logout(body):
     # Workaround...?
-    session = body["session"]
-
-    DB.remove_auth(session)
-
-    return API.OK(None, { 'Set-Cookie': 'session=; Path=/; Max-Age=-1; SameSite=None; Secure'})
+    try:
+        session = body["session"]
+        DB.remove_auth(session)
+    except Exception:
+        whatever = False
+    finally:
+        return API.OK(None, { 'Set-Cookie': 'session=; Path=/; Max-Age=-1; SameSite=None; Secure'})

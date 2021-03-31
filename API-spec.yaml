@@ -359,6 +359,7 @@ paths:
               properties:
                 session:
                   type: string
+      security: []
       responses:
         '200':
           description: User is logged out
@@ -379,8 +380,6 @@ paths:
                     enum: [200]
                   data:
                     type: object
-        '401':
-          $ref: '#/components/responses/NotAuthorized' 
 
 security:
   - cookieAuth: []
