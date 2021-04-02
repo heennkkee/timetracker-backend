@@ -1,9 +1,6 @@
 import requests, time, secrets, uuid, hashlib, binascii, os, pyotp
 import API, DB
 
-# pyotp.random_base32()
-# pyotp.TOTP(secret).now()
-
 def getNewSalt():
     return hashlib.sha256(os.urandom(60)).hexdigest()
 
@@ -30,7 +27,12 @@ def login(body):
         if not mfacode:
             return API.Forbidden("2fa")
         
-        if not pyotp.TOTP(user["mfasecret"]).verify(mfacode):
+        valid_window = 5
+        # ugly workaround for some local clock-issues..
+        if __debug__:
+            valid_window = 300
+
+        if not pyotp.TOTP(user["mfasecret"]).verify(mfacode, valid_window=valid_window):
             return API.Unauthorized("Authorization failed")
 
     session = secrets.token_urlsafe(16)
