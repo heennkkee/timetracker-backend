@@ -2,8 +2,8 @@ import datetime, copy
 import API
 import DB
 
-def list_users_all_clockings(userid, limit=None, since=None):
-    return API.OK(DB.get_clockings(userid, limit, since))
+def list_user_clockings(userid, limit=None, since=None, to=None):
+    return API.OK(DB.get_clockings(userid, limit, since, to))
 
 def remove_clocking(userid, clockingid):
     clocking = DB.get_clocking(userid, clockingid)

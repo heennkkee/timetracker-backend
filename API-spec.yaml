@@ -145,7 +145,7 @@ paths:
           $ref: '#/components/responses/ServerError'
   /users/{userid}/clockings:
     get:
-      operationId: clockings.list_users_all_clockings
+      operationId: clockings.list_user_clockings
       tags:
         - Clockings
       summary: Get all clockings from a user, sorted in descending order
@@ -159,6 +159,12 @@ paths:
         - name: since
           in: query
           description: Optional parameter to limit since what datetime clockings should be included
+          schema:
+            type: string    
+            format: date-time
+        - name: to
+          in: query
+          description: Optional parameter to limit to what datetime clockings should be included
           schema:
             type: string    
             format: date-time

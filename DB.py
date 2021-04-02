@@ -165,24 +165,37 @@ def remove_auth(session):
 
     close(conn, cur)
 
-def get_clockings(userid, limit=None, since=None):
+def get_clockings(userid, limit=None, since=None, to=None):
     conn, cur = open()
     sqlLimit = ''
     sqlSince = ''
+    sqlTo = ''
+
     if limit:
         sqlLimit = ' LIMIT %s '
 
     if since:
         sqlSince = ' AND datetime >= %s '
 
-    sql = 'SELECT id as id, userid as userid, datetime as datetime, direction as direction FROM public.clocking WHERE userid = %s ' + sqlSince + ' ORDER BY datetime desc' + sqlLimit
+    if to:
+        sqlTo = ' AND datetime < %s '
 
-    if limit and since:
+    sql = 'SELECT id as id, userid as userid, datetime as datetime, direction as direction FROM public.clocking WHERE userid = %s ' + sqlSince + sqlTo + ' ORDER BY datetime desc' + sqlLimit
+
+    if limit and since and to:
+        cur.execute(sql, ( userid, since, limit, to ))
+    elif since and to:
+        cur.execute(sql, ( userid, since, to ))
+    elif since and limit:
         cur.execute(sql, ( userid, since, limit ))
+    elif to and limit:
+        cur.execute(sql, ( userid, to, limit ))
     elif since: 
         cur.execute(sql, ( userid, since ))
     elif limit:
         cur.execute(sql, ( userid, limit ))
+    elif to:
+        cur.execute(sql, ( userid, to ))
     else:
         cur.execute(sql, ( userid, ))
     
