@@ -219,7 +219,46 @@ paths:
           $ref: '#/components/responses/NotFound'
         '400':
           $ref: '#/components/responses/InputError'
- 
+  
+  /users/{userid}/report:
+    get:
+      operationId: clockings.summarizeTimePerDay
+      description: Returns a summary of worktime grouped per day
+      tags:
+        - Clockings
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - name: since
+          required: True
+          in: query
+          description: Required parameter to limit since what datetime clockings should be included
+          schema:
+            type: string    
+            format: date-time
+        - name: to
+          required: True
+          in: query
+          description: Required parameter to limit to what datetime clockings should be included
+          schema:
+            type: string  
+            format: date-time
+      responses:
+        '200':
+          description: Summary
+          content:
+            application/json:
+              schema:
+                required:
+                  - status
+                  - data
+                properties: 
+                  status:
+                    type: integer
+                    enum: [200]
+                  data:
+                    type: object
+                    additionalProperties:
+                      $ref: '#/components/schemas/WorktimeSummary'
   /users/{userid}/clockings/{clockingid}:
     delete:
       operationId: clockings.remove_clocking
@@ -350,7 +389,6 @@ paths:
                     enum: ["2fa"]
         '401':
           $ref: '#/components/responses/NotAuthorized'          
-
   /auth/logout:
     post:
       operationId: auth.logout
@@ -449,6 +487,21 @@ components:
           type: string
         type:
           type: string
+    WorktimeSummary:
+      required:
+        - worktime
+        - ob1
+        - ob2
+        - ob3
+      properties:
+        worktime:
+          type: integer
+        ob1:
+          type: integer
+        ob2:
+          type: integer
+        ob3:
+          type: integer
     Clocking:
       required:
         - id

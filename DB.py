@@ -165,39 +165,35 @@ def remove_auth(session):
 
     close(conn, cur)
 
-def get_clockings(userid, limit=None, since=None, to=None):
+def get_clockings(userid, limit=None, since=None, to=None, sortOrder='desc'):
     conn, cur = open()
     sqlLimit = ''
     sqlSince = ''
     sqlTo = ''
 
     if limit:
-        sqlLimit = ' LIMIT %s '
+        sqlLimit = ' LIMIT %(limit)s '
 
     if since:
-        sqlSince = ' AND datetime >= %s '
+        sqlSince = ' AND datetime >= %(since)s '
 
     if to:
-        sqlTo = ' AND datetime < %s '
+        sqlTo = ' AND datetime < %(to)s '
 
-    sql = 'SELECT id as id, userid as userid, datetime as datetime, direction as direction FROM public.clocking WHERE userid = %s ' + sqlSince + sqlTo + ' ORDER BY datetime desc' + sqlLimit
+    sql = 'SELECT id as id, userid as userid, datetime as datetime, direction as direction FROM public.clocking WHERE userid = %(userid)s ' + sqlSince + sqlTo + ' ORDER BY public.clocking.datetime ' + ('asc' if sortOrder == 'asc' else 'desc') + sqlLimit
+    
+    params = {
+        'userid': userid
+    }
 
-    if limit and since and to:
-        cur.execute(sql, ( userid, since, limit, to ))
-    elif since and to:
-        cur.execute(sql, ( userid, since, to ))
-    elif since and limit:
-        cur.execute(sql, ( userid, since, limit ))
-    elif to and limit:
-        cur.execute(sql, ( userid, to, limit ))
-    elif since: 
-        cur.execute(sql, ( userid, since ))
-    elif limit:
-        cur.execute(sql, ( userid, limit ))
-    elif to:
-        cur.execute(sql, ( userid, to ))
-    else:
-        cur.execute(sql, ( userid, ))
+    if limit:
+        params['limit'] = limit
+    if since:
+        params['since'] = since
+    if to:
+        params['to'] = to
+    
+    cur.execute(sql, params)
     
     clockings = cur.fetchall()
 
