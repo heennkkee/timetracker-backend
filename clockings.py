@@ -69,8 +69,6 @@ def summarizeTimePerDay(userid, since, to):
 # Weekday 6 (holidays)
 # 00-24: OB3
 
-    return API.OK(None)
-
 def add(userid, body):
     clocking = None
     
