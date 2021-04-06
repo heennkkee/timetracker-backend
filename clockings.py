@@ -34,7 +34,7 @@ def summarizeTimePerDay(userid, since, to):
             }
 
             # midnight
-            midnight = datetime.datetime.combine(clocking['datetime'].date(), datetime.time(0))
+            midnight = datetime.datetime.combine(clocking['datetime'].date(), datetime.time(0), clocking['datetime'].tzinfo)
             
             # If we clocked out, we worked in the night...
             if clocking['direction'] == 'out':
