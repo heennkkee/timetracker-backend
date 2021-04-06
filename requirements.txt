@@ -5,3 +5,4 @@ flask
 psycopg2-binary
 pyotp
 pyqrcode
+pytz

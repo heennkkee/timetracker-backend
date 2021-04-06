@@ -1,6 +1,7 @@
 import datetime, copy
 import API
 import DB
+from pytz import timezone
 
 def list_user_clockings(userid, limit=None, since=None, to=None):
     return API.OK(DB.get_clockings(userid, limit, since, to))
@@ -34,7 +35,9 @@ def summarizeTimePerDay(userid, since, to):
             }
 
             # midnight
-            midnight = datetime.datetime.combine(clocking['datetime'].date(), datetime.time(0), clocking['datetime'].tzinfo)
+            myTz = timezone('Europe/Stockholm')
+            midnight = myTz.localize(datetime.datetime.combine(clocking['datetime'].date(), datetime.time(0)))
+            
             
             # If we clocked out, we worked in the night...
             if clocking['direction'] == 'out':
@@ -46,7 +49,7 @@ def summarizeTimePerDay(userid, since, to):
             if previousClocking:
                 if previousClocking['direction'] == 'in':
                     # Add OB here...
-                    dateSummaries[str(previousClocking['datetime'].date())]['worktime'] += (midnight - previousClocking['datetime']).seconds
+                        dateSummaries[str(previousClocking['datetime'].date())]['worktime'] += (midnight - previousClocking['datetime']).seconds
         
         else:
             # We've already got this post in our summaries
