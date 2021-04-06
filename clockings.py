@@ -2,6 +2,8 @@ import datetime, copy
 import API
 import DB
 from pytz import timezone
+from dateutil.easter import *
+from datetime import timedelta
 
 def list_user_clockings(userid, limit=None, since=None, to=None):
     return API.OK(DB.get_clockings(userid, limit, since, to))
@@ -40,40 +42,137 @@ def summarizeTimePerDay(userid, since, to):
 
             # midnight
             midnight = myTz.localize(datetime.datetime.combine(clocking['datetime'].date(), datetime.time(0)))
-            
-            
+                        
             # If we clocked out, we worked in the night...
             if clocking['direction'] == 'out':
-                # Add OB here...
+                ob = checkOb(midnight, clocking['datetime'].astimezone(myTz))
                 dateSummaries[strKey]['worktime'] = (clocking['datetime'] - midnight).seconds
+                dateSummaries[strKey]['ob1'] = ob['ob1']
+                dateSummaries[strKey]['ob2'] = ob['ob2']
+                dateSummaries[strKey]['ob3'] = ob['ob3']
             
             # Do we have a previous clocking (i.e. this is a new day, but not the first)
             # Check if it was a "clock in", then add some time to yesterday as well.
             if previousClocking:
                 if previousClocking['direction'] == 'in':
-                    # Add OB here...
-                        dateSummaries[str(previousClocking['datetime'].date())]['worktime'] += (midnight - previousClocking['datetime']).seconds
-        
+                        ob = checkOb(previousClocking['datetime'].astimezone(myTz), midnight)
+                        key = str(previousClocking['datetime'].date())
+                        dateSummaries[key]['worktime'] += (midnight - previousClocking['datetime']).seconds
+                        dateSummaries[key]['ob1'] += ob['ob1']
+                        dateSummaries[key]['ob2'] += ob['ob2']
+                        dateSummaries[key]['ob3'] += ob['ob3']
+
         else:
             # We've already got this post in our summaries
             if clocking['direction'] == 'out':
-                # Add OB here...
+                ob = checkOb(previousClocking['datetime'].astimezone(myTz), clocking['datetime'].astimezone(myTz))
                 dateSummaries[strKey]['worktime'] += (clocking['datetime'] - previousClocking['datetime']).seconds
+                dateSummaries[strKey]['ob1'] += ob['ob1']
+                dateSummaries[strKey]['ob2'] += ob['ob2']
+                dateSummaries[strKey]['ob3'] += ob['ob3']
 
         previousClocking = clocking
         
     return API.OK(dateSummaries)
         
 
-# Weekday range(0, 6) (0 t.o.m 5)
-# 21-24: OB1
-# 00-07: OB2
+def checkOb(fr, to):
+    # 00-24 (weekday == 6):         OB3
+    # 07-21 (weekday == 5):         OB3
+    # 00-07 (weekday range(0, 6)):  OB2
+    # 21-24 (weekday range(0, 6)):  OB1
 
-# Weekday 5
-# 07-21: OB3
+    if (fr.tzinfo != to.tzinfo):
+        raise("From and to must be the same timezone")
 
-# Weekday 6 (holidays)
-# 00-24: OB3
+    returnValue = {
+        'ob1': 0,
+        'ob2': 0,
+        'ob3': 0
+    }
+
+    isHoliday = checkHolidays(fr.date())
+    weekDay = fr.weekday()
+
+    seven = datetime.datetime.combine(fr.date(), datetime.time(hour=7, tzinfo=fr.tzinfo))
+    eveningNine = datetime.datetime.combine(fr.date(), datetime.time(hour=21, tzinfo=fr.tzinfo))
+    if isHoliday or weekDay == 6:
+        returnValue['ob3'] = (to - fr).seconds
+    else:
+        if (to <= seven):
+            # Same for weekdays [0, 5]
+            # OB2 (full range)
+            returnValue['ob2'] = (to - fr).seconds
+        elif (fr >= eveningNine):
+            # Same for weekdays [0, 5]
+            # OB 1 (full range)
+            returnValue['ob1'] = (to - fr).seconds
+        elif (fr >= seven and to <= eveningNine):
+            if (weekDay == 5):
+                returnValue['ob3'] = (to - fr).seconds
+#            else:
+#               no Ob
+        elif (fr < seven and to > eveningNine):
+            # Overlap whole day (OB2, (no OB | OB3), OB1)
+            returnValue['ob2'] = (seven - fr).seconds
+            returnValue['ob1'] = (to - eveningNine).seconds
+            if weekDay == 5:
+                returnValue['ob3'] = (eveningNine - to).seconds
+        elif (fr < 7):
+            # overlap morning -> midday (OB2, (no OB | OB3))
+            returnValue['ob2'] = (seven - fr).seconds
+            if weekDay == 5:
+                returnValue['ob3'] = (to - seven).seconds
+        else:
+            # overlap midday -> evening ((no ob | OB3) -> OB1)
+            if weekDay == 5:
+                returnValue['ob3'] = (to - seven).seconds
+
+            returnValue['ob1'] = (to - eveningNine).seconds
+            
+    return returnValue
+
+
+def checkHolidays(dt):
+    month = dt.month
+    day = dt.day
+    if month == 1:
+        if day in [1, 6]:
+            return True
+    if month == 5:
+        if day in [1]:
+            return True
+    if month == 6:
+        if day in [6]:
+            return True
+        
+        # Midsummer
+        if day in range(20, 27) and dt.weekday == 5: # saturday
+            return True
+
+    if month == 12:
+        if day in [25, 26]:
+            return True
+
+    # Easter
+    easterDt = easter(dt.year)
+    # Påskdagen
+    if dt == easterDt:
+        return True
+    
+    # Annandag påsk
+    if dt == (easterDt + timedelta(days=1)):
+        return True
+
+    # Långfredagen
+    if dt == (easterDt - timedelta(days=2)):
+        return True
+    
+    # Kristi flygare
+    if dt == (easterDt + timedelta(days=39)):
+        return True
+
+    return False
 
 def add(userid, body):
     clocking = None
