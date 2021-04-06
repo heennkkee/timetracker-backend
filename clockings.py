@@ -34,8 +34,11 @@ def summarizeTimePerDay(userid, since, to):
                 'ob3': 0
             }
 
-            # midnight
+            
+            # To-Do: move this to user setting/schedule instead.
             myTz = timezone('Europe/Stockholm')
+
+            # midnight
             midnight = myTz.localize(datetime.datetime.combine(clocking['datetime'].date(), datetime.time(0)))
             
             
