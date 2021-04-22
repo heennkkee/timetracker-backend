@@ -118,7 +118,7 @@ def checkOb(fr, to):
             returnValue['ob1'] = (to - eveningNine).seconds
             if weekDay == 5:
                 returnValue['ob3'] = (eveningNine - to).seconds
-        elif (fr < 7):
+        elif (fr < seven):
             # overlap morning -> midday (OB2, (no OB | OB3))
             returnValue['ob2'] = (seven - fr).seconds
             if weekDay == 5:
