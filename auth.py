@@ -43,7 +43,8 @@ def login(body):
     return API.OK({ "session": session, "userid": user["id"] }, { 'Set-Cookie': 'session={0}; Path=/; Max-Age={1}; SameSite=None; Secure'.format(session, idValidity * 3600) })
 
 def isValidSession(apikey, required_scopes=None):
-    if DB.check_if_session_valid(apikey):
+    apiWithoutAnythingAfter = apikey.split(",")
+    if DB.check_if_session_valid(apiWithoutAnythingAfter[0]):
         return {'sub': 'whatever'}
 
     return None
