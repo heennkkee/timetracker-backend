@@ -139,24 +139,20 @@ def add_auth(userid, session, validHours):
 
     issue = cur.execute("INSERT INTO public.authenticate (userid, session, expiry) VALUES (%s, %s, (NOW() + interval '%s hour'))", ( userid, session, validHours ))
     if not issue:
-        print(f'Inserting session {session}')
         conn.commit()
 
     close(conn, cur)
 
 def check_if_session_valid(session):
     conn, cur = open()
-    print(f'Checking for {session}')
     cur.execute("SELECT 'exists' FROM public.authenticate WHERE session = %s AND expiry > NOW() ORDER BY expiry DESC LIMIT 1", ( session,  ))
     auths = cur.fetchone()
 
     close(conn, cur)
 
     if auths:
-        print(f'{session} exists in the database')
         return True
     
-    print(f'{session} did not exists in the database')
     return False
 
 def remove_auth(session):
@@ -164,7 +160,6 @@ def remove_auth(session):
     
     issue = cur.execute("DELETE FROM public.authenticate WHERE session = %s", ( session, ))
     if not issue:
-        print(f'Removing session {session}')
         conn.commit()
 
     close(conn, cur)
