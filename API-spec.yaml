@@ -256,9 +256,13 @@ paths:
                     type: integer
                     enum: [200]
                   data:
-                    type: object
-                    additionalProperties:
-                      $ref: '#/components/schemas/WorktimeSummary'
+                    properties:
+                      summary:
+                        $ref: '#/components/schemas/WorktimeSummary'
+                      details:
+                        type: object
+                        additionalProperties:
+                          $ref: '#/components/schemas/WorktimeSummary'
   /users/{userid}/clockings/{clockingid}:
     delete:
       operationId: clockings.remove_clocking

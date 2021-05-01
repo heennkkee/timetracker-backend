@@ -78,7 +78,20 @@ def summarizeTimePerDay(userid, since, to):
                 dateSummaries[strKey]['ob2'] += ob['ob2']
                 dateSummaries[strKey]['ob3'] += ob['ob3']
 
-    return API.OK(dateSummaries)
+    summary = {
+        'worktime': 0,
+        'ob1': 0,
+        'ob2': 0,
+        'ob3': 0
+    }
+
+    for dateKey in dateSummaries:
+        summary['worktime'] += dateSummaries[dateKey]['worktime']
+        summary['ob1'] += dateSummaries[dateKey]['ob1']
+        summary['ob2'] += dateSummaries[dateKey]['ob2']
+        summary['ob3'] += dateSummaries[dateKey]['ob3']
+
+    return API.OK({ 'summary': summary, 'details': dateSummaries })
         
 
 def checkOb(fr, to):
