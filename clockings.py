@@ -2,7 +2,7 @@ import datetime, copy
 import API
 import DB
 from pytz import timezone
-from dateutil.easter import *
+from dateutil import easter
 from datetime import timedelta
 
 def list_user_clockings(userid, limit=None, since=None, to=None):
@@ -21,9 +21,23 @@ def remove_clocking(userid, clockingid):
 def summarizeTimePerDay(userid, since, to):
     clockings = DB.get_clockings(userid, None, since, to, 'asc')
 
+    # To-Do: move this to user setting/schedule instead.
+    myTz = timezone('Europe/Stockholm')
+
+    # iterate to... make timezone adjustments
+    for cl in clockings:
+        cl['datetime'] = cl['datetime'].astimezone(myTz)
+
     dateSummaries = {}
-    previousClocking = None
-    for clocking in clockings:
+    maxLength = len(clockings)
+
+    for i in range(maxLength):
+        previousClocking = clockings[i - 1] if i > 0 else None
+        clocking = clockings[i]
+
+        # midnight
+        midnight = myTz.localize(datetime.datetime.combine(clocking['datetime'].date(), datetime.time(0)))
+
         strKey = str(clocking['datetime'].date())
 
         # Existing or new post?
@@ -35,17 +49,10 @@ def summarizeTimePerDay(userid, since, to):
                 'ob2': 0,
                 'ob3': 0
             }
-
-            
-            # To-Do: move this to user setting/schedule instead.
-            myTz = timezone('Europe/Stockholm')
-
-            # midnight
-            midnight = myTz.localize(datetime.datetime.combine(clocking['datetime'].date(), datetime.time(0)))
                         
             # If we clocked out, we worked in the night...
             if clocking['direction'] == 'out':
-                ob = checkOb(midnight, clocking['datetime'].astimezone(myTz))
+                ob = checkOb(midnight, clocking['datetime'])
                 dateSummaries[strKey]['worktime'] = (clocking['datetime'] - midnight).seconds
                 dateSummaries[strKey]['ob1'] = ob['ob1']
                 dateSummaries[strKey]['ob2'] = ob['ob2']
@@ -55,24 +62,22 @@ def summarizeTimePerDay(userid, since, to):
             # Check if it was a "clock in", then add some time to yesterday as well.
             if previousClocking:
                 if previousClocking['direction'] == 'in':
-                        ob = checkOb(previousClocking['datetime'].astimezone(myTz), midnight)
-                        key = str(previousClocking['datetime'].date())
-                        dateSummaries[key]['worktime'] += (midnight - previousClocking['datetime']).seconds
-                        dateSummaries[key]['ob1'] += ob['ob1']
-                        dateSummaries[key]['ob2'] += ob['ob2']
-                        dateSummaries[key]['ob3'] += ob['ob3']
+                    ob = checkOb(previousClocking['datetime'], midnight)
+                    key = str(previousClocking['datetime'].date())
+                    dateSummaries[key]['worktime'] += (midnight - previousClocking['datetime']).seconds
+                    dateSummaries[key]['ob1'] += ob['ob1']
+                    dateSummaries[key]['ob2'] += ob['ob2']
+                    dateSummaries[key]['ob3'] += ob['ob3']
 
         else:
             # We've already got this post in our summaries
             if clocking['direction'] == 'out':
-                ob = checkOb(previousClocking['datetime'].astimezone(myTz), clocking['datetime'].astimezone(myTz))
+                ob = checkOb(previousClocking['datetime'], clocking['datetime'])
                 dateSummaries[strKey]['worktime'] += (clocking['datetime'] - previousClocking['datetime']).seconds
                 dateSummaries[strKey]['ob1'] += ob['ob1']
                 dateSummaries[strKey]['ob2'] += ob['ob2']
                 dateSummaries[strKey]['ob3'] += ob['ob3']
 
-        previousClocking = clocking
-        
     return API.OK(dateSummaries)
         
 
@@ -155,7 +160,7 @@ def checkHolidays(dt):
             return True
 
     # Easter
-    easterDt = easter(dt.year)
+    easterDt = easter.easter(dt.year)
     # Påskdagen
     if dt == easterDt:
         return True
