@@ -5,6 +5,9 @@ from pytz import timezone
 from dateutil import easter
 from datetime import timedelta
 
+# To-Do: move this to user setting/schedule instead.
+myTz = timezone('Europe/Stockholm')
+
 def list_user_clockings(userid, limit=None, since=None, to=None):
     return API.OK(DB.get_clockings(userid, limit, since, to))
 
@@ -20,9 +23,6 @@ def remove_clocking(userid, clockingid):
 
 def summarizeTimePerDay(userid, since, to):
     clockings = DB.get_clockings(userid, None, since, to, 'asc')
-
-    # To-Do: move this to user setting/schedule instead.
-    myTz = timezone('Europe/Stockholm')
 
     # iterate to... make timezone adjustments
     for cl in clockings:

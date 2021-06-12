@@ -11,6 +11,16 @@ servers:
     description: Production API
 
 paths:
+  /ping:
+    get:
+      operationId: generic.ping
+      security: []
+      tags:
+        - Maintenance
+      summary: Pings the service to check for aliveness
+      responses:
+        '200':
+          $ref: '#/components/responses/EmptyOk'
   /users:
     get:
       operationId: users.list_all
@@ -256,6 +266,9 @@ paths:
                     type: integer
                     enum: [200]
                   data:
+                    required:
+                      - summary
+                      - details
                     properties:
                       summary:
                         $ref: '#/components/schemas/WorktimeSummary'
