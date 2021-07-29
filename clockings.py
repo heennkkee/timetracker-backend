@@ -2,7 +2,7 @@ import datetime, copy
 import API
 import DB
 from pytz import timezone
-from dateutil import easter
+from dateutil import easter, parser
 from datetime import timedelta
 
 # To-Do: move this to user setting/schedule instead.
@@ -75,8 +75,8 @@ def summarizeTimePerDay(userid, since, to):
                 dateSummaries[strKey]['ob3'] += ob['ob3']
 
 
-    localizedSince = datetime.datetime.strptime(since, '%Y-%m-%dT%H:%M:%S.%f%z').astimezone(myTz).date()
-    localizedTo = datetime.datetime.strptime(to, '%Y-%m-%dT%H:%M:%S.%f%z').astimezone(myTz).date()
+    localizedSince = parser.parse(since).astimezone(myTz).date()
+    localizedTo = parser.parse(to).astimezone(myTz).date()
     for i in range((localizedTo - localizedSince).days):
         dt = localizedSince + timedelta(days=i)
         dtKey = str(dt)
