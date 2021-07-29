@@ -275,7 +275,7 @@ paths:
                       details:
                         type: object
                         additionalProperties:
-                          $ref: '#/components/schemas/WorktimeSummary'
+                          $ref: '#/components/schemas/DaytimeSummary'
   /users/{userid}/clockings/{clockingid}:
     delete:
       operationId: clockings.remove_clocking
@@ -507,12 +507,36 @@ components:
     WorktimeSummary:
       required:
         - worktime
+        - scheduled
         - ob1
         - ob2
         - ob3
       properties:
+        scheduled:
+          type: integer
         worktime:
           type: integer
+        ob1:
+          type: integer
+        ob2:
+          type: integer
+        ob3:
+          type: integer
+    DaytimeSummary:
+      required:
+        - worktime
+        - scheduled
+        - isHoliday
+        - ob1
+        - ob2
+        - ob3
+      properties:
+        scheduled:
+          type: integer
+        worktime:
+          type: integer
+        isHoliday:
+          type: boolean
         ob1:
           type: integer
         ob2:

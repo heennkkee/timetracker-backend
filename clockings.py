@@ -31,6 +31,7 @@ def summarizeTimePerDay(userid, since, to):
     dateSummaries = {}
     maxLength = len(clockings)
 
+
     for i in range(maxLength):
         previousClocking = clockings[i - 1] if i > 0 else None
         clocking = clockings[i]
@@ -43,12 +44,7 @@ def summarizeTimePerDay(userid, since, to):
         # Existing or new post?
         if not strKey in dateSummaries.keys():
             # Create a post to keep our counts in
-            dateSummaries[strKey] = {
-                'worktime': 0,
-                'ob1': 0,
-                'ob2': 0,
-                'ob3': 0
-            }
+            dateSummaries[strKey] = getBaseWorktimeObj(clocking['datetime'])
                         
             # If we clocked out, we worked in the night...
             if clocking['direction'] == 'out':
@@ -78,8 +74,21 @@ def summarizeTimePerDay(userid, since, to):
                 dateSummaries[strKey]['ob2'] += ob['ob2']
                 dateSummaries[strKey]['ob3'] += ob['ob3']
 
+
+    localizedSince = datetime.datetime.strptime(since, '%Y-%m-%dT%H:%M:%S.%f%z').astimezone(myTz).date()
+    localizedTo = datetime.datetime.strptime(to, '%Y-%m-%dT%H:%M:%S.%f%z').astimezone(myTz).date()
+    for i in range((localizedTo - localizedSince).days):
+        dt = localizedSince + timedelta(days=i)
+        dtKey = str(dt)
+        if not dtKey in dateSummaries.keys():
+            dateSummaries[dtKey] = getBaseWorktimeObj(dt)
+        
+    
+
+
     summary = {
         'worktime': 0,
+        'scheduled': 0,
         'ob1': 0,
         'ob2': 0,
         'ob3': 0
@@ -87,12 +96,24 @@ def summarizeTimePerDay(userid, since, to):
 
     for dateKey in dateSummaries:
         summary['worktime'] += dateSummaries[dateKey]['worktime']
+        summary['scheduled'] += dateSummaries[dateKey]['scheduled']
         summary['ob1'] += dateSummaries[dateKey]['ob1']
         summary['ob2'] += dateSummaries[dateKey]['ob2']
         summary['ob3'] += dateSummaries[dateKey]['ob3']
 
     return API.OK({ 'summary': summary, 'details': dateSummaries })
         
+
+def getBaseWorktimeObj(date):
+    isHoliday = (date.weekday() == 6 or checkHolidays(date))
+    return {
+        'worktime': 0,
+        'scheduled': (3600 * 8, 0)[(isHoliday or date.weekday() == 5)], # standard workday is 8 hours
+        'isHoliday': isHoliday,
+        'ob1': 0,
+        'ob2': 0,
+        'ob3': 0
+    }
 
 def checkOb(fr, to):
     # 00-24 (weekday == 6):         OB3
@@ -155,12 +176,15 @@ def checkHolidays(dt):
     month = dt.month
     day = dt.day
     if month == 1:
+        # first/sixth of January are holidays
         if day in [1, 6]:
             return True
     if month == 5:
+        # First of May
         if day in [1]:
             return True
     if month == 6:
+        # Sixth of June
         if day in [6]:
             return True
         
@@ -169,6 +193,7 @@ def checkHolidays(dt):
             return True
 
     if month == 12:
+        # Christmas
         if day in [25, 26]:
             return True
 
