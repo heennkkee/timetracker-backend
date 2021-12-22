@@ -196,6 +196,11 @@ def checkHolidays(dt):
         # Christmas
         if day in [25, 26]:
             return True
+        
+        # Swedish non-working days
+        # Unclear if this should be "holiday", no idea about OB decisions...
+        if day in [24, 31]:
+            return True
 
     # Easter
     easterDt = easter.easter(dt.year)
